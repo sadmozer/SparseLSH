@@ -276,9 +276,9 @@ class LSH(object):
             binary_hash = self._hash(self.uniform_planes[i], query_point)
             for key in list(table.keys()):
                 # calculate distance from query point hash to all hashes
-                distance = cosine(
-                    self._string_bits_to_array(key),
-                    self._string_bits_to_array(binary_hash))
+                distance = cosine_dist(
+                    [self._string_bits_to_array(key)],
+                    [self._string_bits_to_array(binary_hash)])
                 # NOTE: we could make this threshold user defined
                 if distance < 2:
                     print(f"{distance}<2")
