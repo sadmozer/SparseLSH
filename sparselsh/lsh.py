@@ -281,11 +281,11 @@ class LSH(object):
                     [self._string_bits_to_array(binary_hash)])
                 # NOTE: we could make this threshold user defined
                 if distance < threshold:
-                    print(f"{distance}<2")
+                    # print(f"{distance}<2")
                     members = table.get_list(key)
                     candidates.extend(members)
-                else:
-                    print(f"{distance}>2")
+                # else:
+                #     print(f"{distance}>2")
 
         # rank candidates by distance function
         ranked_candidates = []
