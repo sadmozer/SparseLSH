@@ -6,7 +6,7 @@ import numpy as np
 from scipy import sparse
 from scipy.sparse import csr_matrix
 from scipy.spatial.distance import cosine
-# from sklearn.metrics.pairwise import cosine_distances
+from sklearn.metrics.pairwise import cosine_distances
 from .storage import storage, serialize, deserialize
 
 class LSH(object):
