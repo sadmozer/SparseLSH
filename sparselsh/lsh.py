@@ -231,7 +231,7 @@ class LSH(object):
         """
         return np.array( [ float(i) for i in hash_key])
 
-    def query(self, query_point, num_results=None, distance_func=None):
+    def query(self, query_point, num_results=None, distance_func=None, threshold=0.9):
         """ Takes `query_point` which is a sparse CSR matrix of 1 x `input_dim`,
         returns `num_results` of results as a list of tuples that are ranked
         based on the supplied metric function `distance_func`.
@@ -280,7 +280,7 @@ class LSH(object):
                     [self._string_bits_to_array(key)],
                     [self._string_bits_to_array(binary_hash)])
                 # NOTE: we could make this threshold user defined
-                if distance < 2:
+                if distance < threshold:
                     print(f"{distance}<2")
                     members = table.get_list(key)
                     candidates.extend(members)
