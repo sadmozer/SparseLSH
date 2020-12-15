@@ -321,7 +321,8 @@ class LSH(object):
 
     @staticmethod
     def cosine_dist(x, y):
-        return cosine_distances(x, y, return_dense=False)
-        # x_n = csr_matrix.sqrt(csr_matrix.dot(x, x.T))
-        # y_n = csr_matrix.sqrt(csr_matrix.dot(y, y.T))
-        # return 1 - csr_matrix.dot(x, y.T) / (x_n * y_n)
+        print(x.shape, y.shape)
+        x_n = csr_matrix.sqrt(csr_matrix.dot(x, x.T))
+        y_n = csr_matrix.sqrt(csr_matrix.dot(y, y.T))
+        return 1 - csr_matrix.dot(x, y.T) / (x_n * y_n)
+        # return cosine_distances(x, y)
