@@ -5,7 +5,8 @@ import json
 import numpy as np
 from scipy import sparse
 from scipy.sparse import csr_matrix
-from sklearn.metrics.pairwise import cosine_distances
+from scipy.spatial.distance import cosine
+# from sklearn.metrics.pairwise import cosine_distances
 from .storage import storage, serialize, deserialize
 
 class LSH(object):
@@ -325,4 +326,4 @@ class LSH(object):
         # x_n = csr_matrix.sqrt(csr_matrix.dot(x, x.T))
         # y_n = csr_matrix.sqrt(csr_matrix.dot(y, y.T))
         # return 1 - csr_matrix.dot(x, y.T) / (x_n * y_n)
-        return cosine_distances(x, y)
+        return cosine(x, y)
