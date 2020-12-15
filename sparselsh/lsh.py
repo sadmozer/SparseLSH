@@ -8,6 +8,7 @@ from scipy.sparse import csr_matrix
 from scipy.spatial.distance import cosine
 from sklearn.metrics.pairwise import cosine_distances
 from .storage import storage, serialize, deserialize
+import math
 
 class LSH(object):
     """ LSH implments locality sensitive hashing using random projection for
@@ -276,11 +277,12 @@ class LSH(object):
             binary_hash = self._hash(self.uniform_planes[i], query_point)
             for key in list(table.keys()):
                 # calculate distance from query point hash to all hashes
-                distance = LSH.cosine_dist(
-                    [self._string_bits_to_array(key)],
-                    [self._string_bits_to_array(binary_hash)])
+                distance = LSH.hamming_dist(
+                    self._string_bits_to_array(key),
+                    self._string_bits_to_array(binary_hash))
                 # NOTE: we could make this threshold user defined
-                if distance < threshold:
+                cos_distance = 1-math.cos(distance/self.hash_size*math.pi)
+                if cos_distance < threshold:
                     # print(f"{distance}<2")
                     members = table.get_list(key)
                     candidates.extend(members)
