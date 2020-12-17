@@ -7,6 +7,7 @@ from scipy import sparse
 from scipy.sparse import csr_matrix
 from scipy.spatial.distance import cosine
 from sklearn.metrics.pairwise import cosine_distances
+from sklearn.metrics.pairwise import pairwise_distances
 from .storage import storage, serialize, deserialize
 import math
 
@@ -232,7 +233,7 @@ class LSH(object):
         """
         return np.array( [ float(i) for i in hash_key])
 
-    def query(self, query_point, num_results=None, distance_func=None, threshold=0.9):
+    def query(self, query_point, num_results=None, distance_func=None, threshold=2):
         """ Takes `query_point` which is a sparse CSR matrix of 1 x `input_dim`,
         returns `num_results` of results as a list of tuples that are ranked
         based on the supplied metric function `distance_func`.
@@ -277,12 +278,11 @@ class LSH(object):
             binary_hash = self._hash(self.uniform_planes[i], query_point)
             for key in list(table.keys()):
                 # calculate distance from query point hash to all hashes
-                distance = LSH.hamming_dist(
+                distance = LSH.jaccard_dist(
                     self._string_bits_to_array(key),
                     self._string_bits_to_array(binary_hash))
                 # NOTE: we could make this threshold user defined
-                cos_distance = 1-math.cos(distance/self.hash_size*math.pi)
-                if cos_distance < threshold:
+                if distance < threshold:
                     # print(f"{distance}<2")
                     members = table.get_list(key)
                     candidates.extend(members)
@@ -309,6 +309,10 @@ class LSH(object):
         return (sparse1 != sparse2).sum()
 
     @staticmethod
+    def jaccard_dist(sparse1, sparse2):
+        return pairwise_distances(sparse1.reshape(1, -1), sparse2.reshape(1, -1), metric='jaccard')[0, 0]
+
+    @staticmethod
     def euclidean_dist(x, y):
         diff = x - y
         return np.sqrt(diff.dot(diff.T))
@@ -330,4 +334,4 @@ class LSH(object):
         # x_n = csr_matrix.sqrt(csr_matrix.dot(x, x.T))
         # y_n = csr_matrix.sqrt(csr_matrix.dot(y, y.T))
         # return 1 - csr_matrix.dot(x, y.T) / (x_n * y_n)
-        return cosine_distances(x, y)[0][0]
+        return cosine_distances([x], [y])[0][0]
