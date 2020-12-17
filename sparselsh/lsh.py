@@ -318,8 +318,8 @@ class LSH(object):
 
     @staticmethod
     def jaccard_dist(sparse1, sparse2):
-        s1 = sparse1.reshape(1, -1)
-        s2 = sparse2.reshape(1, -1)
+        s1 = sparse1.reshape(1, -1).astype(bool)
+        s2 = sparse2.reshape(1, -1).astype(bool)
         return pairwise_distances(s1, s2, metric='jaccard')[0, 0]
 
     @staticmethod
@@ -341,4 +341,4 @@ class LSH(object):
 
     @staticmethod
     def cosine_dist(x, y):
-        return cosine_distances([x], [y])[0][0]
+        return cosine_distances(x, y)[0][0]
