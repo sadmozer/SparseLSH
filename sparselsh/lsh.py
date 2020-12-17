@@ -233,7 +233,7 @@ class LSH(object):
         """
         return np.array( [ float(i) for i in hash_key])
 
-    def query(self, query_point, num_results=None, distance_func=None, threshold=2):
+    def query(self, query_point, num_results=None, distance_func=None, key_distance_func=None, key_distance_threshold=2):
         """ Takes `query_point` which is a sparse CSR matrix of 1 x `input_dim`,
         returns `num_results` of results as a list of tuples that are ranked
         based on the supplied metric function `distance_func`.
@@ -272,22 +272,30 @@ class LSH(object):
                 "The distance function %s is invalid." % distance_func
             )
 
+        if key_distance_func is None:
+            key_d_func = LSH.hamming_dist
+        elif key_distance_func == "hamming":
+            key_d_func = LSH.hamming_dist
+        elif key_distance_func == "jaccard":
+            key_d_func = LSH.jaccard_dist
+        else:
+            raise ValueError(
+                "The key distance function %s is invalid." % key_distance_func
+            )
+
         candidates = []
         for i, table in enumerate(self.hash_tables):
             # get hash of query point
             binary_hash = self._hash(self.uniform_planes[i], query_point)
             for key in list(table.keys()):
                 # calculate distance from query point hash to all hashes
-                distance = LSH.jaccard_dist(
+                distance = key_d_func(
                     self._string_bits_to_array(key),
                     self._string_bits_to_array(binary_hash))
                 # NOTE: we could make this threshold user defined
-                if distance < threshold:
-                    # print(f"{distance}<2")
+                if distance < key_distance_threshold:
                     members = table.get_list(key)
                     candidates.extend(members)
-                # else:
-                #     print(f"{distance}>2")
 
         # rank candidates by distance function
         ranked_candidates = []
@@ -310,7 +318,9 @@ class LSH(object):
 
     @staticmethod
     def jaccard_dist(sparse1, sparse2):
-        return pairwise_distances(sparse1.reshape(1, -1), sparse2.reshape(1, -1), metric='jaccard')[0, 0]
+        s1 = sparse1.reshape(1, -1)
+        s2 = sparse2.reshape(1, -1)
+        return pairwise_distances(s1, s2, metric='jaccard')[0, 0]
 
     @staticmethod
     def euclidean_dist(x, y):
@@ -331,7 +341,4 @@ class LSH(object):
 
     @staticmethod
     def cosine_dist(x, y):
-        # x_n = csr_matrix.sqrt(csr_matrix.dot(x, x.T))
-        # y_n = csr_matrix.sqrt(csr_matrix.dot(y, y.T))
-        # return 1 - csr_matrix.dot(x, y.T) / (x_n * y_n)
         return cosine_distances([x], [y])[0][0]
